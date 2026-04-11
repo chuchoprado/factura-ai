@@ -1,0 +1,24 @@
+# Secretos — NUNCA a Git
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+bot_data.db
+
+# Node
+node_modules/
+.next/
+out/
+npm-debug.log*
+
+# Mac
+.DS_Store
+.DS_Store?

@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #1F3864;
+  --color-accent:  #4F7FE8;
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-slate-50 text-slate-900 antialiased; }
+}
+
+@layer utilities {
+  .gradient-brand {
+    @apply bg-gradient-to-br from-[#1F3864] to-[#4F7FE8];
+  }
+}
