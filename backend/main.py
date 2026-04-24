@@ -18,11 +18,12 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
-from auth     import get_current_user, require_active_subscription
-from billing  import create_checkout_session, create_portal_session, handle_stripe_webhook
-from database import get_supabase, get_supabase_anon
-from extract  import create_invoice_excel, extract_invoice_from_page, pdf_to_page_images, sort_and_renumber_rows
-from models   import PLAN_LIMITS, PlanInfo
+from auth         import get_current_user, require_active_subscription
+from billing      import create_checkout_session, create_portal_session, handle_stripe_webhook
+from database     import get_supabase, get_supabase_anon
+from extract      import create_invoice_excel, extract_invoice_from_page, pdf_to_page_images, sort_and_renumber_rows
+from models       import PLAN_LIMITS, PlanInfo
+from telegram_bot import process_update
 
 load_dotenv(override=True)
 
@@ -362,3 +363,18 @@ async def stripe_webhook(request: Request):
     sb         = get_supabase()
     result     = await handle_stripe_webhook(payload, sig_header, sb)
     return result
+
+
+# ─────────────────────────────────────────────
+# TELEGRAM BOT — Webhook
+# ─────────────────────────────────────────────
+
+@app.post("/telegram/webhook", include_in_schema=False)
+async def telegram_webhook(request: Request):
+    """Recibe updates de Telegram y los procesa con el asistente OpenAI."""
+    try:
+        update = await request.json()
+        await process_update(update)
+    except Exception as e:
+        logger.error(f"Error en telegram webhook: {e}")
+    return {"ok": True}
