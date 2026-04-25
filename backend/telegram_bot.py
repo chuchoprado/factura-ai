@@ -234,32 +234,7 @@ async def process_update(update: dict):
 
     # /start
     if text.lower() in ("/start",):
-        if chat_id in validated_users:
-            await tg_send(chat_id, "✅ Ya estás validado. Puedes escribirme.")
-        else:
-            waiting_email.add(chat_id)
-            await tg_send(chat_id, "Por favor, proporciona tu email para validar el acceso:")
-        return
-
-    # Esperando email
-    if chat_id in waiting_email and text:
-        try:
-            emails = _get_whitelist_emails()
-            if text.lower() in emails:
-                validated_users[chat_id] = text.lower()
-                waiting_email.discard(chat_id)
-                await tg_send(chat_id, f"✅ Acceso concedido. ¡Bienvenido, {username}!")
-            else:
-                await tg_send(chat_id, "❌ Email no válido. Inténtalo nuevamente.")
-        except Exception as e:
-            logger.error(f"Error validando email: {e}")
-            await tg_send(chat_id, "❌ Error al validar. Intenta más tarde.")
-        return
-
-    # Sin validar
-    if chat_id not in validated_users:
-        waiting_email.add(chat_id)
-        await tg_send(chat_id, "Por favor, proporciona tu email para validar el acceso:")
+        await tg_send(chat_id, f"¡Hola {username}! Soy tu asistente administrativo. ¿En qué puedo ayudarte?")
         return
 
     # Mensaje de texto → OpenAI Assistant
