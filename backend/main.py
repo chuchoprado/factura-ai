@@ -12,7 +12,7 @@ from typing import Any, Dict, List
 import anthropic
 from dotenv import load_dotenv
 from fastapi import (
-    Depends, FastAPI, File, Form, HTTPException,
+    BackgroundTasks, Depends, FastAPI, File, Form, HTTPException,
     Request, UploadFile, status,
 )
 from fastapi.middleware.cors import CORSMiddleware
@@ -370,11 +370,11 @@ async def stripe_webhook(request: Request):
 # ─────────────────────────────────────────────
 
 @app.post("/telegram/webhook", include_in_schema=False)
-async def telegram_webhook(request: Request):
-    """Recibe updates de Telegram y los procesa con el asistente OpenAI."""
+async def telegram_webhook(request: Request, background_tasks: BackgroundTasks):
+    """Recibe updates de Telegram — responde 200 inmediato y procesa en background."""
     try:
         update = await request.json()
-        await process_update(update)
+        background_tasks.add_task(process_update, update)
     except Exception as e:
         logger.error(f"Error en telegram webhook: {e}")
     return {"ok": True}
