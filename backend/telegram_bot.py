@@ -12,7 +12,7 @@ import httpx
 import gspread
 from gtts import gTTS
 from openai import OpenAI
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 
 logger = logging.getLogger(__name__)
 
@@ -62,8 +62,8 @@ def get_sheet():
         "https://spreadsheets.google.com/feeds",
         "https://www.googleapis.com/auth/drive",
     ]
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_PATH, scope)
-    gc    = gspread.authorize(credentials)
+    creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scope)
+    gc    = gspread.authorize(creds)
     sheet = gc.open(SPREADSHEET_NAME).sheet1
     return sheet
 
