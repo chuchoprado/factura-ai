@@ -10,7 +10,6 @@ import tempfile
 
 import httpx
 import gspread
-from gtts import gTTS
 from openai import OpenAI
 from google.oauth2.service_account import Credentials
 
@@ -215,31 +214,9 @@ async def process_update(update: dict):
             with open(tmp_path, "rb") as af:
                 transcription = oai.audio.transcriptions.create(model="whisper-1", file=af)
 
-            thread = oai.beta.threads.create()
-            oai.beta.threads.messages.create(
-                thread_id=thread.id, role="user", content=transcription.text
-            )
-            run = oai.beta.threads.runs.create(
-                thread_id=thread.id, assistant_id=ASSISTANT_ID
-            )
-            while True:
-                run = oai.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
-                if run.status == "completed":
-                    msgs   = oai.beta.threads.messages.list(thread_id=thread.id)
-                    reply  = next(
-                        (m.content[0].text.value for m in msgs.data if m.role == "assistant"),
-                        "No pude generar una respuesta.",
-                    )
-                    break
-                if run.status in ("failed", "cancelled", "expired"):
-                    reply = "Error procesando tu nota de voz."
-                    break
-                time.sleep(1)
-
-            tts       = gTTS(reply, lang="es")
-            audio_out = tempfile.mktemp(suffix=".mp3")
-            tts.save(audio_out)
-            await tg_send_voice(chat_id, audio_out)
+            thread_id = get_or_create_thread(chat_id)
+            reply     = ask_assistant(thread_id, transcription.text)
+            await tg_send(chat_id, f"🎤 _{transcription.text}_\n\n{reply}")
 
         except Exception as e:
             logger.error(f"Error procesando voz: {e}")
